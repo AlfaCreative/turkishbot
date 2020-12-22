@@ -1,0 +1,52 @@
+client.unload = command => {
+    return new Promise((resolve, reject) => {
+        try {
+            delete require.cache[require.resolve(`./komutlar/${command}`)];
+            let cmd = require(`./komutlar/${command}`);
+            client.commands.delete(command);
+            client.aliases.forEach((cmd, alias) => {
+                if (cmd === command) client.aliases.delete(alias);
+            });
+            resolve();
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+client.elevation = message => {
+    if (!message.guild) {
+        return;
+    }
+    let permlvl = 0;
+    if (message.member.hasPermission("BAN_MEMBERS")) permlvl = 2;
+    if (message.member.hasPermission("ADMINISTRATOR")) permlvl = 3;
+    if (message.author.id === ayarlar.sahip) permlvl = 4;
+    return permlvl;
+};
+
+var regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
+// client.on('debug', e => {
+//   console.log(chalk.bgBlue.green(e.replace(regToken, 'that was redacted')));
+// });
+
+client.on('warn', e => {
+    console.log(chalk.bgYellow(e.replace(regToken, 'that was redacted')));
+});
+
+client.on('error', e => {
+    console.log(chalk.bgRed(e.replace(regToken, 'that was redacted')));
+});
+
+client.on('ready', () => {
+    client.user.setPresence({
+        game: {
+            name: `HyperioN | beta.bothyperx.xyz`,
+            type: 'WATCHING'
+        },
+        status: 'online'
+    })
+  })
+
+client.login(ayarlar.token);
+
